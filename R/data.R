@@ -2,9 +2,14 @@
 #'
 #' @return A tibble containing Pokémon TCG data.
 #' @export
+
+.cache <- new.env(parent = emptyenv())
+
 load_data <- function() {
-
-  path <- "https://www.dropbox.com/scl/fi/tnl4wcmgduu3bnmmllz2u/pokemon_cards.csv?rlkey=h7evg3hr4ckzqrxrzoy458ojs&st=uzrlktbc&dl=1"
-  readr::read_csv(path, show_col_types = FALSE)
-
+  if (!exists("dat", envir = .cache)) {
+    path <- system.file("extdata", "pokemon_cards.parquet", package = "slowpoke")
+    .cache$dat <- arrow::read_parquet(path,
+                                      col_select = c("name", "flavorText", "rarity", "series", "artist"))
+  }
+  .cache$dat
 }
